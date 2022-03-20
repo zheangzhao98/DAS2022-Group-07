@@ -32,6 +32,9 @@ coffee <- as_tibble(coffee)
 coffee1 <- as.data.frame(coffee)
 head(coffee1)
 
+coffee1[which(coffee1$Qualityclass=="Poor"),]$Qualityclass=0
+coffee1[which(coffee1$Qualityclass=="Good"),]$Qualityclass=1
+
 coffee1$Qualityclass = as.factor(coffee1$Qualityclass)
 
 # Logit link 
@@ -63,8 +66,14 @@ clog_model = glm(Qualityclass~aroma + flavor + acidity + defects + altitude + ha
 both_clog = step(clog_model,direction = "both")
 summary(both_clog)
 summ(both_clog)
-## formula = Qualityclass ~ aroma + flavor + acidity + harvested + continent
-## AIC = 537.14, BIC = 575.49
+## formula = Qualityclass ~ aroma + flavor + acidity + harvested
+## AIC = 636.96, BIC = 660.93
 ## Fittness of model
-summary(both_clog)$null.deviance - summary(both_clog)$deviance > qchisq(0.95,891-884)
+summary(both_clog)$null.deviance - summary(both_clog)$deviance > qchisq(0.95,891-887)
 ## TRUE. we can reject the null hypothesis, and the terms are all significant
+
+#
+mod = glm(Qualityclass~ aroma:flavor:acidity + altitude + harvested, data = coffee1, family = binomial(link = "logit"))
+summ(mod)
+mod1 = glm(Qualityclass~ aroma + flavor + acidity + aroma:flavor:acidity + altitude + harvested, data = coffee1, family = binomial(link = "logit"))
+summary(mod1)
